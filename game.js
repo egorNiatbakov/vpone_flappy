@@ -1,8 +1,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 320;
-canvas.height = 480;
+// Устанавливаем размеры canvas под экран 430×900
+canvas.width = 430;
+canvas.height = 900;
 
 const startBtn = document.getElementById("startBtn");
 const menu = document.getElementById("menu");
@@ -28,13 +29,14 @@ let frameCount = 0;
 let score = 0;
 const pipes = [];
 
+// Масштабируем размеры птицы для нового размера экрана
 const bird = {
-    x: 50,
+    x: 80, // Увеличиваем начальную позицию по X
     y: canvas.height / 2,
-    width: 34,
-    height: 24,
-    gravity: 0.25,
-    lift: -5,
+    width: 50, // Увеличиваем размер птицы
+    height: 35,
+    gravity: 0.3, // Немного уменьшаем гравитацию
+    lift: -7, // Увеличиваем подъемную силу
     velocity: 0
 };
 
@@ -62,8 +64,13 @@ function flap() {
 
 // ** Generate Pipes **
 function generatePipes() {
-    let topHeight = Math.random() * (canvas.height - 180) + 30;
-    pipes.push({ x: canvas.width, topHeight, bottomY: topHeight + 120 });
+    let topHeight = Math.random() * (canvas.height - 250) + 50; // Увеличиваем диапазон высот
+    pipes.push({ 
+        x: canvas.width, 
+        topHeight, 
+        bottomY: topHeight + 180, // Увеличиваем расстояние между трубами
+        width: 70 // Увеличиваем ширину труб
+    });
 }
 
 // ** Update Game Mechanics **
@@ -73,11 +80,11 @@ function update() {
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
 
-    if (frameCount % 100 === 0) generatePipes();
+    if (frameCount % 120 === 0) generatePipes(); // Увеличиваем интервал генерации труб
 
-    pipes.forEach(pipe => pipe.x -= 2);
+    pipes.forEach(pipe => pipe.x -= 3); // Увеличиваем скорость движения труб
     
-    if (pipes.length && pipes[0].x + 50 < 0) {
+    if (pipes.length && pipes[0].x + pipes[0].width < 0) {
         pipes.shift();
         score++;
 
@@ -91,7 +98,7 @@ function update() {
     if (bird.y + bird.height > canvas.height || bird.y < 0) endGame();
 
     pipes.forEach(pipe => {
-        if (bird.x + bird.width > pipe.x && bird.x < pipe.x + 50) {
+        if (bird.x + bird.width > pipe.x && bird.x < pipe.x + pipe.width) {
             if (bird.y < pipe.topHeight || bird.y + bird.height > pipe.bottomY) endGame();
         }
     });
@@ -103,12 +110,12 @@ function update() {
 function drawPipes() {
     pipes.forEach(pipe => {
         ctx.save();
-        ctx.translate(pipe.x + 50, pipe.topHeight);
+        ctx.translate(pipe.x + pipe.width, pipe.topHeight);
         ctx.scale(1, -1);
-        ctx.drawImage(pipeTopImg, -50, 0, 50, 320);
+        ctx.drawImage(pipeTopImg, -pipe.width, 0, pipe.width, 800); // Увеличиваем высоту труб
         ctx.restore();
 
-        ctx.drawImage(pipeBottomImg, pipe.x, pipe.bottomY, 50, 320);
+        ctx.drawImage(pipeBottomImg, pipe.x, pipe.bottomY, pipe.width, 800);
     });
 }
 
@@ -119,16 +126,16 @@ function draw() {
     drawPipes();
 
     ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-    ctx.fillText(`Score: ${score}`, 10, 25);
+    ctx.font = "28px Arial"; // Увеличиваем размер шрифта
+    ctx.fillText(`Score: ${score}`, 20, 40);
 
     // ** Display Highest Score at Upper Right **
-    ctx.fillText(`Best: ${highestScore}`, canvas.width - 100, 25);
+    ctx.fillText(`Best: ${highestScore}`, canvas.width - 150, 40);
 
     if (gameOver) {
         ctx.fillStyle = "red";
-        ctx.font = "30px Arial";
-        ctx.fillText("", 90, 240);
+        ctx.font = "40px Arial"; // Увеличиваем размер шрифта
+        ctx.fillText("Game Over", canvas.width/2 - 100, canvas.height/2);
     }
 }
 
